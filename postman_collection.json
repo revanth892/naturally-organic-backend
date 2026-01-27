@@ -1,0 +1,639 @@
+{
+    "info": {
+        "_postman_id": "a1b2c3d4-e5f6-4a5b-8c9d-e0f1a2b3c4d5",
+        "name": "MyFarmerSolution API",
+        "description": "API collection for MyFarmerSolution Product Management",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Orders",
+            "item": [
+                {
+                    "name": "Place Order (Checkout)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.collectionVariables.set(\"orderId\", jsonData.data._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"paymentMethod\": \"cod\",\n    \"couponCode\": \"SUMMER2025\",\n    \"shippingAddress\": {\n        \"name\": \"John Doe\",\n        \"phoneNumber\": \"+919876543210\",\n        \"address\": \"123 Farm House, Vizag, AP\"\n    }\n}"
+                        },
+                        "url": "{{baseUrl}}/api/orders/checkout"
+                    }
+                },
+                {
+                    "name": "Get My Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/orders/my-orders"
+                    }
+                },
+                {
+                    "name": "Get Order By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/orders/:id"
+                    }
+                },
+                {
+                    "name": "List All Orders (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/orders"
+                    }
+                },
+                {
+                    "name": "Update Order Status (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"shipped\",\n    \"paymentStatus\": \"pending\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/orders/:id/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Coupons",
+            "item": [
+                {
+                    "name": "Create Coupon (Manual Code)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"SUMMER2025\",\n    \"description\": \"Summer Sale for Retailers\",\n    \"discountType\": \"percentage\",\n    \"discountValue\": 15,\n    \"minOrderValue\": 5000,\n    \"maxDiscountAmount\": 1000,\n    \"userType\": \"retailer\",\n    \"usageLimit\": 100\n}"
+                        },
+                        "url": "{{baseUrl}}/api/coupons"
+                    }
+                },
+                {
+                    "name": "Generate Coupon (Auto Code)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"New Farmer Welcome\",\n    \"discountType\": \"fixed\",\n    \"discountValue\": 500,\n    \"minOrderValue\": 2000,\n    \"userType\": \"farmer\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/coupons"
+                    }
+                },
+                {
+                    "name": "List All Coupons",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/coupons"
+                    }
+                },
+                {
+                    "name": "Validate Coupon",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"SUMMER2025\",\n    \"cartValue\": 6000,\n    \"userType\": \"retailer\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/coupons/validate"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Create Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.collectionVariables.set(\"PRODUCT_ID\", jsonData.data._id);",
+                                    "    if(jsonData.data.variants && jsonData.data.variants.length > 0) {",
+                                    "         pm.collectionVariables.set(\"VARIANT_ID\", jsonData.data.variants[0]._id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Neem Oil\",\n    \"category\": \"Pesticide\",\n    \"rating\": 4.5,\n    \"soldBy\": \"Farmer Solution Co.\",\n    \"manufacturedBy\": \"BioAgri Ltd.\",\n    \"images\": [\n        {\n            \"key\": \"neem-oil-main\",\n            \"location\": \"https://s3.amazon.com/farmer/neem.jpg\",\n            \"filename\": \"neem.jpg\"\n        }\n    ],\n    \"variants\": [\n        {\n            \"size\": \"500ml\",\n            \"unit\": \"ml\",\n            \"description\": \"Pure cold-pressed neem oil for organic farming\",\n            \"customerPrice\": 150,\n            \"customerDiscount\": 10,\n            \"showCustomerDiscount\": true,\n            \"retailerPrice\": 120,\n            \"retailerDiscount\": 5,\n            \"showRetailerDiscount\": true,\n            \"liveFor\": \"both\",\n            \"stockQuantity\": 100\n        }\n    ],\n    \"packagingInfo\": \"Plastic Bottle\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/products",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List All Products",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/products"
+                    }
+                },
+                {
+                    "name": "Get Product by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/products/:id"
+                    }
+                },
+                {
+                    "name": "Update Product (Flexibly)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Premium Neem Oil\",\n    \"rating\": 4.9,\n    \"packagingInfo\": \"Glass Bottle\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/products/:id"
+                    }
+                },
+                {
+                    "name": "Soft Delete Product",
+                    "request": {
+                        "method": "PATCH",
+                        "url": "{{baseUrl}}/api/products/:id/soft-delete"
+                    }
+                },
+                {
+                    "name": "List Products (App User)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/products/user/:userId"
+                    }
+                },
+                {
+                    "name": "Get Product by ID (App User)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/products/:id/user/:userId"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Variants & Images",
+            "item": [
+                {
+                    "name": "Add Variant",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"size\": \"1L\",\n    \"unit\": \"L\",\n    \"description\": \"Bulk pack for large farms\",\n    \"customerPrice\": 450,\n    \"customerDiscount\": 15,\n    \"showCustomerDiscount\": true,\n    \"retailerPrice\": 380,\n    \"liveFor\": \"both\",\n    \"stockQuantity\": 50\n}"
+                        },
+                        "url": "{{baseUrl}}/api/products/:productId/variants"
+                    }
+                },
+                {
+                    "name": "Update Variant (Flexibly)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"stockQuantity\": 60,\n    \"customerPrice\": 460,\n    \"description\": \"Updated description field\",\n    \"isInStock\": true,\n    \"size\": \"550ml\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/products/:productId/variants/:variantId"
+                    }
+                },
+                {
+                    "name": "Delete Variant",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/products/:productId/variants/:variantId"
+                    }
+                },
+                {
+                    "name": "Toggle Image Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"isActive\": false\n}"
+                        },
+                        "url": "{{baseUrl}}/api/products/:productId/images/:imageKey/toggle"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "CMS Users",
+            "item": [
+                {
+                    "name": "Create CMS User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Admin User\",\n    \"login\": \"admin_user\",\n    \"password\": \"password123\",\n    \"permissions\": {\n        \"userProfilesAccess\": true,\n        \"productAccess\": true,\n        \"financeAccess\": true,\n        \"userManagementAccess\": true,\n        \"analyticsAccess\": true\n    }\n}"
+                        },
+                        "url": "{{baseUrl}}/api/users"
+                    }
+                },
+                {
+                    "name": "Login CMS User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.token) {",
+                                    "    pm.collectionVariables.set(\"admin_token\", jsonData.token);",
+                                    "}",
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"login\": \"admin_user\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/users/login"
+                    }
+                },
+                {
+                    "name": "List All CMS Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/users"
+                    }
+                },
+                {
+                    "name": "Get CMS User By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/users/:id"
+                    }
+                },
+                {
+                    "name": "Update User Permissions",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"userProfilesAccess\": true,\n    \"productAccess\": false\n}"
+                        },
+                        "url": "{{baseUrl}}/api/users/:id/permissions"
+                    }
+                },
+                {
+                    "name": "Reset User Password",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"password\": \"newPassword456\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/users/:id/reset-password"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "App Users (Mobile)",
+            "item": [
+                {
+                    "name": "Request OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phoneNumber\": \"+919876543210\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/app-users/request-otp"
+                    }
+                },
+                {},
+                {
+                    "name": "Verify OTP (Login/Register)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.token) {",
+                                    "    pm.collectionVariables.set(\"app_token\", jsonData.token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phoneNumber\": \"+919876543210\",\n    \"otp\": \"123456\",\n    \"username\": \"Jane Doe\",\n    \"isFarmer\": false,\n    \"isRetailer\": true,\n    \"retailerProfile\": {\n        \"shopName\": \"Jane's Agri Store\",\n        \"gstNumber\": \"22AAAAA0000A1Z5\"\n    }\n}"
+                        },
+                        "url": "{{baseUrl}}/api/app-users/verify-otp"
+                    }
+                },
+                {
+                    "name": "Resend OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phoneNumber\": \"+919876543210\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/app-users/resend-otp"
+                    }
+                },
+                {
+                    "name": "Get User Profile & Cart",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/app-users/profile"
+                    }
+                },
+                {
+                    "name": "Update Cart (Add/Edit/Remove)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"productId\": \"{{PRODUCT_ID}}\",\n    \"variantId\": \"{{VARIANT_ID}}\",\n    \"quantity\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/api/app-users/cart"
+                    }
+                },
+                {
+                    "name": "Update App User Profile",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"John Updated\",\n    \"isFarmer\": false,\n    \"isRetailer\": true,\n    \"isRetailerProfileComplete\": true,\n    \"source\": \"app\",\n    \"address\": {\n        \"street\": \"Main Road\",\n        \"city\": \"Hyderabad\",\n        \"state\": \"Telangana\",\n        \"pincode\": \"500001\"\n    },\n    \"retailerProfile\": {\n        \"shopName\": \"John's Seeds & Fertilisers\",\n        \"gstNumber\": \"36AAAAA0000A1Z5\",\n        \"shopAddress\": \"Market Yard, Gachibowli, Hyderabad, 500032\"\n    }\n}"
+                        },
+                        "url": "{{baseUrl}}/api/app-users/profile"
+                    }
+                },
+                {
+                    "name": "Clear Cart",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{app_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/app-users/cart"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000",
+            "type": "string"
+        }
+    ]
+}
