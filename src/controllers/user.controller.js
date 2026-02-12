@@ -117,6 +117,10 @@ export const updatePermissions = async (req, res) => {
         if (orderManagementAccess !== undefined) updateData.orderManagementAccess = orderManagementAccess;
         if (leadManagementAccess !== undefined) updateData.leadManagementAccess = leadManagementAccess;
         if (couponAccess !== undefined) updateData.couponAccess = couponAccess;
+        if (req.body.storeAccess !== undefined) updateData.storeAccess = req.body.storeAccess;
+        if (req.body.brandAccess !== undefined) updateData.brandAccess = req.body.brandAccess;
+        if (req.body.faqAccess !== undefined) updateData.faqAccess = req.body.faqAccess;
+        if (req.body.postcodeAccess !== undefined) updateData.postcodeAccess = req.body.postcodeAccess;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,

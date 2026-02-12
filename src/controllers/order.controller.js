@@ -46,19 +46,19 @@ export const placeOrder = async (req, res) => {
                 });
             }
 
-            // Snapshot Data
-            const price = variant.price;
+            // 1B. Snapshot Data - Price based on user type
+            const price = user.isRetailer ? (variant.retailerDiscount || variant.retailerPrice) : (variant.customerDiscount || variant.customerPrice);
             const subtotal = price * item.quantity;
 
-            // Determine active image
+            // 1C. Determine active image
             const activeImage = product.images.find(img => img.isActive) || product.images[0];
-            const imageUrl = activeImage ? activeImage.url : "";
+            const imageUrl = activeImage ? activeImage.location : "";
 
             orderItems.push({
                 product: product._id,
                 variantId: variant._id,
                 name: product.name,
-                variantLabel: variant.label,
+                variantLabel: variant.size, // in product model it is 'size' not 'label'
                 quantity: item.quantity,
                 price: price,
                 subtotal: subtotal,

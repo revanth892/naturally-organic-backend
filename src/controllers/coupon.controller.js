@@ -95,7 +95,7 @@ export const deleteCoupon = async (req, res) => {
 // VALIDATE COUPON CODE (Helper for Checkout)
 export const validateCouponCode = async (req, res) => {
     try {
-        const { code, cartValue, userType } = req.body; // userType optional if checking for "all"
+        const { code, cartValue } = req.body; // userType optional if checking for "all"
 
         const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true });
 
@@ -113,14 +113,9 @@ export const validateCouponCode = async (req, res) => {
             return error(res, "Coupon usage limit reached");
         }
 
-        // 3. Check User Type Restriction
-        if (coupon.userType !== "all" && userType && coupon.userType !== userType) {
-            return error(res, `This coupon is only for ${coupon.userType}s`);
-        }
-
         // 4. Check Minimum Order Value
         if (cartValue && cartValue < coupon.minOrderValue) {
-            return error(res, `Minimum order value of ₹${coupon.minOrderValue} required`);
+            return error(res, `Minimum order value of £${coupon.minOrderValue} required`);
         }
 
         // 5. Calculate Potential Discount (Just for Info)

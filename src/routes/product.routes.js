@@ -11,6 +11,7 @@ import {
     deleteVariant,
     getProductsForUser,
     getOneProductForUser,
+    getProductsByCategory,
 } from "../controllers/product.controller.js";
 import { authenticateAppUser, authenticateAdmin } from "../middleware/auth.middleware.js";
 
@@ -19,6 +20,7 @@ const router = express.Router();
 router.post("/", authenticateAdmin, createProduct);
 router.get("/", getAllProducts);
 router.get("/app/user", authenticateAppUser, getProductsForUser); // Authenticated Fetch
+router.get("/app/category/:categoryId", authenticateAppUser, getProductsByCategory); // Get by Category
 router.get("/:id", getOneProduct);
 router.get("/:id/app/user", authenticateAppUser, getOneProductForUser); // Authenticated Fetch
 router.patch("/:id", authenticateAdmin, updateProduct);

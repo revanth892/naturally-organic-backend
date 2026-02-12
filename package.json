@@ -1,13 +1,15 @@
 {
-  "name": "myfarmersolution_backend",
+  "name": "naturally_organic_backend",
   "version": "1.0.0",
-  "description": "Backend for My Farmer Solution",
+  "description": "Backend for Naturally Organic",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "seed:users": "node src/seed/appUserSeed.js"
+    "seed:users": "node src/seed/appUserSeed.js",
+    "seed:cms": "node src/seed/cmsUserSeed.js",
+    "seed:products": "node src/seed/masterProductSeed.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",
@@ -17,6 +19,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^8.12.1"
+    "mongoose": "^8.12.1",
+    "sharp": "^0.34.5"
   }
 }

@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema(
         orderManagementAccess: { type: Boolean, default: false },
         leadManagementAccess: { type: Boolean, default: false },
         couponAccess: { type: Boolean, default: false },
+        brandAccess: { type: Boolean, default: false },
+        storeAccess: { type: Boolean, default: false },
+        faqAccess: { type: Boolean, default: false },
+        postcodeAccess: { type: Boolean, default: false },
 
         isActive: { type: Boolean, default: true },
         isDeleted: { type: Boolean, default: false },

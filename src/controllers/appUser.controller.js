@@ -1,21 +1,15 @@
 import AppUser from "../models/appUser.model.js";
-import Otp from "../models/otp.model.js";
 import Product from "../models/product.model.js";
 import jwt from "jsonwebtoken";
-import { signUserImages } from "../utils/s3.js";
-import AppUserHistory from "../models/appUserHistory.model.js";
+import { signUserImages, signProductImages } from "../utils/s3.js";
+import CartActivity from "../models/cartActivity.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-it";
-
-// Utility to generate 4-digit OTP
-const generateOtp = () => Math.floor(1000 + Math.random() * 9000).toString();
 
 // GET ALL APP USERS (Dashboard)
 export const getAllAppUsers = async (req, res) => {
     try {
         const users = await AppUser.find({})
-            .populate("lastEditedBy", "name email")
-            .populate("assignedTo", "name email")
             .sort({ createdAt: -1 });
 
         const signedUsers = await Promise.all(users.map(u => signUserImages(u)));
@@ -28,9 +22,7 @@ export const getAllAppUsers = async (req, res) => {
 // GET SINGLE APP USER (Dashboard)
 export const getAppUserById = async (req, res) => {
     try {
-        const user = await AppUser.findById(req.params.id)
-            .populate("lastEditedBy", "name email")
-            .populate("assignedTo", "name email");
+        const user = await AppUser.findById(req.params.id);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
         const signedUser = await signUserImages(user);
@@ -40,92 +32,70 @@ export const getAppUserById = async (req, res) => {
     }
 };
 
-// REQUEST OTP
-export const requestOtp = async (req, res) => {
+// REGISTER
+export const register = async (req, res) => {
     try {
-        const { phoneNumber } = req.body;
-        if (!phoneNumber) {
-            return res.status(400).json({ success: false, error: "Phone number is required" });
+        const { email, password, username, phoneNumber } = req.body;
+
+        if (!email || !password || !username) {
+            return res.status(400).json({ success: false, error: "Email, password and username are required" });
         }
 
-        const otpCode = generateOtp();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+        const existingUser = await AppUser.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, error: "Email already in use" });
+        }
 
-        // Upsert OTP record
-        await Otp.findOneAndUpdate(
-            { phoneNumber },
-            { otp: otpCode, expiresAt },
-            { upsert: true, new: true }
-        );
+        const user = await AppUser.create({
+            email,
+            password,
+            username,
+            phoneNumber,
+            policyChecked: req.body.policyChecked || false,
+            source: req.body.source || "web",
+            address: req.body.address || {},
+            cart: []
+        });
 
-        // TODO: Integrate with SMS Gateway (e.g., Twilio, Firebase, etc.)
-        // For now, logging to console for development
-        console.log(`[OTP] For ${phoneNumber}: ${otpCode}`);
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "30d" });
+        const signedUser = await signUserImages(user);
 
-        res.json({ success: true, message: "OTP sent successfully" });
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            token,
+            data: signedUser
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 };
 
-// VERIFY OTP (Login / Register)
-export const verifyOtp = async (req, res) => {
+// LOGIN
+export const login = async (req, res) => {
     try {
-        const { phoneNumber, otp, username, isFarmer, isRetailer } = req.body;
+        const { email, password } = req.body;
 
-        if (!phoneNumber || !otp) {
-            return res.status(400).json({ success: false, error: "Phone number and OTP are required" });
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: "Email and password are required" });
         }
 
-        // Check if OTP is valid
-        const otpRecord = await Otp.findOne({ phoneNumber, otp });
-        if (!otpRecord) {
-            return res.status(400).json({ success: false, error: "Invalid or expired OTP" });
-        }
-
-        // OTP verified, check if user exists
-        let user = await AppUser.findOne({ phoneNumber });
-        let isNewUser = false;
-
+        const user = await AppUser.findOne({ email }).select("+password");
         if (!user) {
-            // New user registration
-            if (!username) {
-                // If username is not provided, we can still create the user with a default or just phone
-                // Designing it to be flexible: if no username provided, use phone number as username initially
-            }
-            user = await AppUser.create({
-                phoneNumber,
-                username: username || phoneNumber,
-                isFarmer: isFarmer || false,
-                isRetailer: isRetailer || false,
-                policyChecked: req.body.policyChecked || false,
-                source: req.body.source || "app",
-                isRetailerProfileComplete: req.body.isRetailerProfileComplete || false,
-                address: req.body.address || {},
-                retailerProfile: req.body.retailerProfile || {},
-                cart: []
-            });
-            isNewUser = true;
-        } else {
-            // If existing user, update policyChecked if provided and true
-            if (req.body.policyChecked) {
-                user.policyChecked = true;
-                await user.save();
-            }
+            return res.status(401).json({ success: false, error: "Invalid email or password" });
         }
 
-        // Delete OTP after successful verification
-        await Otp.deleteOne({ _id: otpRecord._id });
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, error: "Invalid email or password" });
+        }
 
-        // Generate JWT Token
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "30d" });
-
         const signedUser = await signUserImages(user);
 
         res.json({
             success: true,
-            message: isNewUser ? "Registered & logged in" : "Login successful",
-            isNewUser,
+            message: "Login successful",
             token,
             data: signedUser
         });
@@ -140,16 +110,13 @@ export const updateCart = async (req, res) => {
         const userId = req.user._id;
         const { productId, variantId, quantity } = req.body;
 
-        // 1. Basic validation
         if (quantity === undefined) {
             return res.status(400).json({ success: false, error: "Quantity is required" });
         }
 
-        // 2. Fetch User
         const user = await AppUser.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        // 3. If adding/updating (quantity > 0), validate product and variant
         if (quantity > 0) {
             const product = await Product.findOne({ _id: productId, isDeleted: false });
             if (!product) {
@@ -174,25 +141,56 @@ export const updateCart = async (req, res) => {
             }
         }
 
-        // 4. Update logic
         const itemIndex = user.cart.findIndex(
             (item) => item.productId.toString() === productId && item.variantId.toString() === variantId
         );
 
+        let action = "";
+        let logDetails = "";
+
         if (itemIndex > -1) {
-            // Item exists in cart
             if (quantity <= 0) {
-                user.cart.splice(itemIndex, 1); // Remove if quantity 0
+                action = "REMOVE";
+                logDetails = `Removed ${user.cart[itemIndex].quantity} units of product from cart`;
+                user.cart.splice(itemIndex, 1);
             } else {
-                user.cart[itemIndex].quantity = quantity; // Update quantity
+                const oldQty = user.cart[itemIndex].quantity;
+                action = "UPDATE_QUANTITY";
+                logDetails = `Updated quantity from ${oldQty} to ${quantity}`;
+                user.cart[itemIndex].quantity = quantity;
             }
         } else if (quantity > 0) {
-            // New item for cart
+            action = "ADD";
+            logDetails = `Added ${quantity} units of product to cart`;
             user.cart.push({ productId, variantId, quantity });
         }
 
+        if (action) {
+            const product = await Product.findById(productId);
+            const variant = product?.variants.id(variantId);
+            await CartActivity.create({
+                user: userId,
+                action,
+                productName: product?.name,
+                variantSize: variant?.size,
+                quantity,
+                details: logDetails
+            });
+        }
+
         await user.save();
-        res.json({ success: true, message: "Cart updated", data: user.cart });
+
+        const updatedUser = await AppUser.findById(userId).populate("cart.productId");
+
+        let cartData = updatedUser.cart.map(item => item.toObject());
+        cartData = await Promise.all(cartData.map(async (item) => {
+            if (item.productId && typeof item.productId === 'object') {
+                item.productId = await signProductImages(item.productId, true);
+            }
+            return item;
+        }));
+
+        res.json({ success: true, message: "Cart updated", data: cartData });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -220,6 +218,16 @@ export const getProfile = async (req, res) => {
         const user = await AppUser.findById(req.user._id).populate("cart.productId");
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
         const signedUser = await signUserImages(user);
+
+        if (signedUser.cart && signedUser.cart.length > 0) {
+            signedUser.cart = await Promise.all(signedUser.cart.map(async (item) => {
+                if (item.productId && typeof item.productId === 'object') {
+                    item.productId = await signProductImages(item.productId, true);
+                }
+                return item;
+            }));
+        }
+
         res.json({ success: true, data: signedUser });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
@@ -234,49 +242,18 @@ export const updateProfile = async (req, res) => {
 
         const updateData = {};
 
-        // Top-level fields
         if (body.username !== undefined) updateData.username = body.username;
-        if (body.isFarmer !== undefined) updateData.isFarmer = body.isFarmer;
-        if (body.isRetailer !== undefined) updateData.isRetailer = body.isRetailer;
-        if (body.isRetailerProfileComplete !== undefined) updateData.isRetailerProfileComplete = body.isRetailerProfileComplete;
         if (body.source !== undefined) updateData.source = body.source;
-        if (body.language !== undefined) updateData.language = body.language;
         if (body.email !== undefined) updateData.email = body.email;
+        if (body.phoneNumber !== undefined) updateData.phoneNumber = body.phoneNumber;
 
-        // Nested Address (Partial)
         if (body.address) {
             for (const [key, value] of Object.entries(body.address)) {
                 updateData[`address.${key}`] = value;
             }
         }
 
-        // Nested Retailer Profile (Partial)
-        if (body.retailerProfile) {
-            for (const [key, value] of Object.entries(body.retailerProfile)) {
-                updateData[`retailerProfile.${key}`] = value;
-            }
-        }
-
-        // Nested Legal and Tax (Partial)
-        if (body.legalAndTax) {
-            for (const [key, value] of Object.entries(body.legalAndTax)) {
-                updateData[`legalAndTax.${key}`] = value;
-            }
-        }
-
-        // Nested Business Details (Partial)
-        if (body.businessDetails) {
-            for (const [key, value] of Object.entries(body.businessDetails)) {
-                updateData[`businessDetails.${key}`] = value;
-            }
-        }
-
-        // Image Arrays
-        const imageFields = [
-            "profileImages", "aadharFrontImages", "aadharBackImages", "panCardImages",
-            "gstCertificateImages", "shopFrontImages", "pesticideLicenseImages",
-            "seedLicenseImages", "fertilizerLicenseImages", "otherDocuments"
-        ];
+        const imageFields = ["profileImages"];
         imageFields.forEach(field => {
             if (body[field]) updateData[field] = body[field];
         });
@@ -302,36 +279,26 @@ export const updateProfile = async (req, res) => {
 export const adminUpdateAppUser = async (req, res) => {
     try {
         const targetUserId = req.params.id;
-        const adminId = req.admin._id;
         const body = req.body;
 
         const updateData = {};
-        updateData.lastEditedBy = adminId;
 
-        // Top-level fields
-        const topLevelFields = ["username", "phoneNumber", "email", "isFarmer", "isRetailer", "isRetailerProfileComplete", "source", "language", "status", "followUpDate", "interactionCount", "remarks", "assignedTo"];
+        const topLevelFields = ["username", "phoneNumber", "email", "source"];
         topLevelFields.forEach(field => {
             if (body[field] !== undefined) updateData[field] = body[field];
         });
 
-        // Nested Objects
-        const nestedObjects = ["address", "retailerProfile", "legalAndTax", "businessDetails"];
+        const nestedObjects = ["address"];
         nestedObjects.forEach(objName => {
             if (body[objName]) {
                 for (const [key, value] of Object.entries(body[objName])) {
-                    // Skip internal mongo/mongoose fields in nested updates
                     if (["_id", "id", "__v", "createdAt", "updatedAt"].includes(key)) continue;
                     updateData[`${objName}.${key}`] = value;
                 }
             }
         });
 
-        // Image Arrays
-        const imageFields = [
-            "profileImages", "aadharFrontImages", "aadharBackImages", "panCardImages",
-            "gstCertificateImages", "shopFrontImages", "pesticideLicenseImages",
-            "seedLicenseImages", "fertilizerLicenseImages", "otherDocuments"
-        ];
+        const imageFields = ["profileImages"];
         imageFields.forEach(field => {
             if (body[field]) updateData[field] = body[field];
         });
@@ -340,8 +307,7 @@ export const adminUpdateAppUser = async (req, res) => {
             targetUserId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).populate("lastEditedBy", "name email")
-            .populate("assignedTo", "name email");
+        );
 
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -349,64 +315,6 @@ export const adminUpdateAppUser = async (req, res) => {
 
         const signedUser = await signUserImages(updatedUser);
         res.json({ success: true, message: "Profile updated by admin", data: signedUser });
-    } catch (err) {
-        res.status(400).json({ success: false, error: err.message });
-    }
-};
-
-// GET APP USER HISTORY (Dashboard)
-export const getAppUserHistory = async (req, res) => {
-    try {
-        const history = await AppUserHistory.find({ appUser: req.params.id })
-            .populate("updatedBy", "name email")
-            .populate("assignedTo", "name email")
-            .sort({ createdAt: -1 });
-        res.json({ success: true, data: history });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-};
-
-// UPDATE LEAD TRACKING STATUS & REMARKS (Dashboard Specialized)
-export const updateLeadTracking = async (req, res) => {
-    try {
-        const targetUserId = req.params.id;
-        const adminId = req.admin._id;
-        const { status, remarks, followUpDate, interactionCount, assignedTo } = req.body;
-
-        const updatedUser = await AppUser.findByIdAndUpdate(
-            targetUserId,
-            {
-                $set: {
-                    status,
-                    remarks,
-                    followUpDate,
-                    interactionCount,
-                    assignedTo,
-                    lastEditedBy: adminId
-                }
-            },
-            { new: true, runValidators: true }
-        ).populate("lastEditedBy", "name email")
-            .populate("assignedTo", "name email");
-
-        if (!updatedUser) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        // Create History Log
-        await AppUserHistory.create({
-            appUser: targetUserId,
-            status,
-            remarks,
-            followUpDate,
-            interactionCount,
-            assignedTo,
-            updatedBy: adminId
-        });
-
-        const signedUser = await signUserImages(updatedUser);
-        res.json({ success: true, message: "Status & Remarks updated", data: signedUser });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

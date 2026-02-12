@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const imageSchema = new mongoose.Schema(
     {
@@ -37,30 +38,26 @@ const appUserSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        phoneNumber: {
+        email: {
             type: String,
             required: true,
             unique: true,
             trim: true,
+            lowercase: true,
         },
-        email: {
+        password: {
+            type: String,
+            required: true,
+            select: false,
+        },
+        phoneNumber: {
             type: String,
             trim: true,
         },
-        isFarmer: {
-            type: Boolean,
-            default: false,
-        },
-        isRetailer: {
-            type: Boolean,
-            default: false,
-        },
         address: {
-            addressType: { type: String, trim: true }, // Home, Office, Shop, etc.
+            addressType: { type: String, trim: true }, // Home, Office, etc.
             pincode: { type: String, trim: true },
             buildingNumber: { type: String, trim: true },
-            shopNumber: { type: String, trim: true },
-            shopName: { type: String, trim: true },
             area: { type: String, trim: true },
             village: { type: String, trim: true },
             city: { type: String, trim: true },
@@ -68,78 +65,14 @@ const appUserSchema = new mongoose.Schema(
             state: { type: String, trim: true },
             landmark: { type: String, trim: true },
         },
-        legalAndTax: {
-            gstNumber: { type: String, trim: true },
-            pan: { type: String, trim: true },
-            aadhar: { type: String, trim: true },
-        },
-        businessDetails: {
-            businessType: { type: String, trim: true },
-            annualIncome: { type: String, trim: true },
-        },
-        language: {
-            type: String,
-            default: "English",
-            trim: true,
-        },
         // Document Images
         profileImages: [imageSchema],
-        aadharFrontImages: [imageSchema],
-        aadharBackImages: [imageSchema],
-        panCardImages: [imageSchema],
-        gstCertificateImages: [imageSchema],
-        shopFrontImages: [imageSchema],
-        pesticideLicenseImages: [imageSchema],
-        seedLicenseImages: [imageSchema],
-        fertilizerLicenseImages: [imageSchema],
-        otherDocuments: [imageSchema],
 
-        retailerProfile: {
-            shopName: { type: String, trim: true },
-            gstNumber: { type: String, trim: true },
-            shopAddress: { type: String, trim: true },
-            // Keeping licenses here for backward compat or specific needs
-            licenses: [
-                {
-                    licenseName: { type: String },
-                    licenseNumber: { type: String },
-                    image: { type: String },
-                },
-            ],
-        },
         cart: [cartItemSchema],
         source: {
             type: String,
-            default: "app",
+            default: "web",
             trim: true,
-        },
-        isRetailerProfileComplete: {
-            type: Boolean,
-            default: false,
-        },
-        lastEditedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
-        status: {
-            type: String,
-            default: "New Lead",
-            enum: ["New Lead", "Follow up", "FO Pending", "KYC Pending"],
-        },
-        followUpDate: {
-            type: Date,
-        },
-        interactionCount: {
-            type: String,
-            default: "0 times",
-        },
-        remarks: {
-            type: String,
-            trim: true,
-        },
-        assignedTo: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
         },
         policyChecked: {
             type: Boolean,
@@ -148,5 +81,22 @@ const appUserSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+// Pre-save hook to hash password
+appUserSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Method to compare password
+appUserSchema.methods.comparePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
 
 export default mongoose.model("AppUser", appUserSchema);

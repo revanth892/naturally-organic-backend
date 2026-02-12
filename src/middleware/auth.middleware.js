@@ -39,7 +39,7 @@ export const authenticateAdmin = async (req, res, next) => {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        // Ensure token has 'admin' role (assuming we set this during login)
+        // Ensure token has 'admin' role
         if (decoded.role !== "admin") {
             return res.status(403).json({ success: false, message: "Access denied: Admins only" });
         }
@@ -49,9 +49,30 @@ export const authenticateAdmin = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "Admin user not found or disabled" });
         }
 
-        req.admin = user; // Separate from req.user to avoid confusion
+        req.admin = user;
         next();
     } catch (err) {
         return res.status(401).json({ success: false, message: "Invalid or expired token" });
     }
+};
+
+// Aliases for easier use in routes
+export const protect = authenticateAdmin;
+
+// Check specific permission
+export const authorize = (permission) => {
+    return (req, res, next) => {
+        if (!req.admin) {
+            return res.status(401).json({ success: false, message: "Authentication required" });
+        }
+
+        if (!req.admin[permission]) {
+            return res.status(403).json({
+                success: false,
+                message: `Lack of permission: ${permission}`
+            });
+        }
+
+        next();
+    };
 };

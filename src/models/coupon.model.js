@@ -14,7 +14,7 @@ const couponSchema = new mongoose.Schema(
         // Discount Mechanics
         discountType: {
             type: String,
-            enum: ["percentage", "fixed"], // "percentage" = % off, "fixed" = flat ₹ off
+            enum: ["percentage", "fixed"], // "percentage" = % off, "fixed" = flat £ off
             required: true,
         },
         discountValue: {
@@ -26,12 +26,6 @@ const couponSchema = new mongoose.Schema(
         // Restrictions
         minOrderValue: { type: Number, default: 0 },
         maxDiscountAmount: { type: Number }, // Only relevant for percentage
-        userType: {
-            type: String,
-            enum: ["all", "farmer", "retailer"],
-            default: "all",
-        },
-
         // Usage Limits (The "count thing")
         usageLimit: { type: Number, default: null }, // Total times this coupon can be redeemed globally. Null = unlimited
         usedCount: { type: Number, default: 0 }, // How many times it has been used so far

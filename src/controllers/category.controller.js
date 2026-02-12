@@ -1,4 +1,5 @@
 import Category from "../models/category.model.js";
+import { signCategoryImages } from "../utils/s3.js";
 
 // CREATE CATEGORY
 export const createCategory = async (req, res) => {
@@ -11,11 +12,20 @@ export const createCategory = async (req, res) => {
 };
 
 // GET ALL CATEGORIES
-// GET ALL CATEGORIES
 export const getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.aggregate([
-            { $match: { isDeleted: false } },
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || "";
+
+        const matchStage = { isDeleted: { $ne: true } };
+        if (search) {
+            matchStage.name = { $regex: search, $options: "i" };
+        }
+
+        const aggregationPipeline = [
+            { $match: matchStage },
             {
                 $lookup: {
                     from: "products",
@@ -39,8 +49,46 @@ export const getAllCategories = async (req, res) => {
             },
             { $project: { products: 0 } },
             { $sort: { name: 1 } },
-        ]);
-        res.json({ success: true, count: categories.length, data: categories });
+            {
+                $facet: {
+                    metadata: [{ $count: "total" }],
+                    data: [{ $skip: skip }, { $limit: limit }]
+                }
+            }
+        ];
+
+        const result = await Category.aggregate(aggregationPipeline);
+        const categories = result[0].data;
+        const total = result[0].metadata[0]?.total || 0;
+
+        const signedCategories = await Promise.all(
+            categories.map((c) => signCategoryImages(c))
+        );
+
+        res.json({
+            success: true,
+            data: signedCategories,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
+// GET CATEGORY BY ID
+export const getCategoryById = async (req, res) => {
+    try {
+        const category = await Category.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({ success: false, error: "Category not found" });
+        }
+        const signedCategory = await signCategoryImages(category);
+        res.json({ success: true, data: signedCategory });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
@@ -54,7 +102,8 @@ export const updateCategory = async (req, res) => {
             req.body,
             { new: true, runValidators: true }
         );
-        res.json({ success: true, data: updated });
+        const signedCategory = await signCategoryImages(updated);
+        res.json({ success: true, data: signedCategory });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

@@ -24,7 +24,11 @@ const usersToCreate = [
         analyticsAccess: true,
         orderManagementAccess: true,
         leadManagementAccess: true,
-        couponAccess: true
+        couponAccess: true,
+        storeAccess: true,
+        brandAccess: true,
+        faqAccess: true,
+        postcodeAccess: true
     },
     {
         name: "Operations Manager",
@@ -37,7 +41,11 @@ const usersToCreate = [
         analyticsAccess: false,
         orderManagementAccess: true,
         leadManagementAccess: true,
-        couponAccess: true
+        couponAccess: true,
+        storeAccess: true,
+        brandAccess: true,
+        faqAccess: true,
+        postcodeAccess: true
     },
     {
         name: "Sales Lead",
@@ -50,7 +58,11 @@ const usersToCreate = [
         analyticsAccess: true,
         orderManagementAccess: false,
         leadManagementAccess: true,
-        couponAccess: false
+        couponAccess: false,
+        storeAccess: false,
+        brandAccess: false,
+        faqAccess: false,
+        postcodeAccess: false
     },
     {
         name: "Support Executive",
@@ -63,7 +75,11 @@ const usersToCreate = [
         analyticsAccess: false,
         orderManagementAccess: true,
         leadManagementAccess: false,
-        couponAccess: false
+        couponAccess: false,
+        storeAccess: false,
+        brandAccess: false,
+        faqAccess: false,
+        postcodeAccess: false
     }
 ];
 
@@ -93,6 +109,10 @@ const seedCMSUsers = async () => {
                 user.orderManagementAccess = userData.orderManagementAccess;
                 user.leadManagementAccess = userData.leadManagementAccess;
                 user.couponAccess = userData.couponAccess;
+                user.storeAccess = userData.storeAccess;
+                user.brandAccess = userData.brandAccess;
+                user.faqAccess = userData.faqAccess;
+                user.postcodeAccess = userData.postcodeAccess;
             } else {
                 // Create new user
                 user = new User(userData);
@@ -112,7 +132,11 @@ const seedCMSUsers = async () => {
                     analytics: userData.analyticsAccess,
                     orderManagement: userData.orderManagementAccess,
                     leadManagement: userData.leadManagementAccess,
-                    coupon: userData.couponAccess
+                    coupon: userData.couponAccess,
+                    store: userData.storeAccess,
+                    brand: userData.brandAccess,
+                    faq: userData.faqAccess,
+                    postcode: userData.postcodeAccess
                 }
             });
         }
