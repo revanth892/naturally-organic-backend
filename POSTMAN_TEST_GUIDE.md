@@ -37,29 +37,29 @@ To run the full suite automatically using **Postman Collection Runner**:
 If you prefer testing endpoints individually, follow this sequence to simulate a real user flow.
 
 ### 1. User Authentication (App User)
-*   **Endpoint**: `POST /api/app-users/verify-otp`
+*   **Endpoint**: `POST /app-users/verify-otp`
 *   **Action**: Send request with `phoneNumber: "+919999999999"` and `otp: "123456"`.
 *   **Verify**: Status `200`. Response contains `token`.
 *   **Note**: The token is **automatically saved** to the variable `{{app_token}}`.
 
 ### 2. Product Management (Admin/Backend)
-*   **Endpoint**: `POST /api/products`
+*   **Endpoint**: `POST /products`
 *   **Action**: Create a new product (e.g., "Neem Oil 500ml").
 *   **Verify**: Status `201`. Response contains `_id` and `variants[0]._id`.
 *   **Note**: The IDs are **automatically saved** to `{{PRODUCT_ID}}` and `{{VARIANT_ID}}`.
 
 ### 3. Coupon Creation
-*   **Endpoint**: `POST /api/coupons`
+*   **Endpoint**: `POST /coupons`
 *   **Action**: Create a coupon `SUMMER2025` with 15% discount.
 *   **Verify**: Status `201`.
 
 ### 4. Shopping Cart
-*   **Endpoint**: `PATCH /api/app-users/cart`
+*   **Endpoint**: `PATCH /app-users/cart`
 *   **Action**: Add quantity `2` of the product created in Step 2.
 *   **Verify**: Status `200`. Response `data` array contains the item.
 
 ### 5. Checkout (Order Placement)
-*   **Endpoint**: `POST /api/orders/checkout`
+*   **Endpoint**: `POST /orders/checkout`
 *   **Action**: Place an order using `cod` and coupon `SUMMER2025`.
 *   **Verify**: 
     *   Status `201`.
@@ -67,12 +67,12 @@ If you prefer testing endpoints individually, follow this sequence to simulate a
     *   `status` is `confirmed`.
 
 ### 6. Order Verification
-*   **Endpoint**: `GET /api/orders/my-orders`
+*   **Endpoint**: `GET /orders/my-orders`
 *   **Action**: List orders for the logged-in user.
 *   **Verify**: The recently placed order is at the top of the list.
 
 ### 7. Stock Reduction Check
-*   **Endpoint**: `GET /api/products/:id`
+*   **Endpoint**: `GET /products/:id`
 *   **Action**: Check the product created in Step 2.
 *   **Verify**: `stockQuantity` has decreased by `2`.
 

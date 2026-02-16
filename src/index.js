@@ -28,30 +28,34 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/products", productRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/app-users", appUserRoutes);
-app.use("/api/coupons", couponRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/media", mediaRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/subcategories", subcategoryRoutes);
-app.use("/api/child-categories", childCategoryRoutes);
-app.use("/api/cart-activity", cartActivityRoutes);
-app.use("/api/brands", brandRoutes);
-app.use("/api/stores", storeRoutes);
-app.use("/api/faqs", faqRoutes);
-app.use("/api/postcodes", postcodeRoutes);
+app.use("/products", productRoutes);
+app.use("/users", userRoutes);
+app.use("/app-users", appUserRoutes);
+app.use("/coupons", couponRoutes);
+app.use("/orders", orderRoutes);
+app.use("/media", mediaRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/subcategories", subcategoryRoutes);
+app.use("/child-categories", childCategoryRoutes);
+app.use("/cart-activity", cartActivityRoutes);
+app.use("/brands", brandRoutes);
+app.use("/stores", storeRoutes);
+app.use("/faqs", faqRoutes);
+app.use("/postcodes", postcodeRoutes);
 
 // Database Connection
 mongoose
     .connect(MONGODB_URI)
     .then(() => {
         console.log("✅ Connected to MongoDB");
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-        });
+        if (process.env.NODE_ENV !== "production") {
+            app.listen(PORT, '0.0.0.0', () => {
+                console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+            });
+        }
     })
     .catch((err) => {
         console.error("❌ MongoDB connection error:", err.message);
     });
+
+export default app;

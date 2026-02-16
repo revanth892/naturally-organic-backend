@@ -45,7 +45,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"paymentMethod\": \"cod\",\n    \"couponCode\": \"SUMMER2025\",\n    \"shippingAddress\": {\n        \"name\": \"John Doe\",\n        \"phoneNumber\": \"+919876543210\",\n        \"address\": \"123 Farm House, Vizag, AP\"\n    }\n}"
                         },
-                        "url": "{{baseUrl}}/api/orders/checkout"
+                        "url": "{{baseUrl}}/orders/checkout"
                     }
                 },
                 {
@@ -59,7 +59,7 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/orders/my-orders"
+                        "url": "{{baseUrl}}/orders/my-orders"
                     }
                 },
                 {
@@ -73,14 +73,14 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/orders/:id"
+                        "url": "{{baseUrl}}/orders/:id"
                     }
                 },
                 {
                     "name": "List All Orders (Admin)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/orders"
+                        "url": "{{baseUrl}}/orders"
                     }
                 },
                 {
@@ -97,7 +97,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"status\": \"shipped\",\n    \"paymentStatus\": \"pending\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/orders/:id/status"
+                        "url": "{{baseUrl}}/orders/:id/status"
                     }
                 }
             ]
@@ -132,7 +132,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"code\": \"SUMMER2025\",\n    \"description\": \"Summer Sale for Retailers\",\n    \"discountType\": \"percentage\",\n    \"discountValue\": 15,\n    \"minOrderValue\": 5000,\n    \"maxDiscountAmount\": 1000,\n    \"userType\": \"retailer\",\n    \"usageLimit\": 100\n}"
                         },
-                        "url": "{{baseUrl}}/api/coupons"
+                        "url": "{{baseUrl}}/coupons"
                     }
                 },
                 {
@@ -149,14 +149,14 @@
                             "mode": "raw",
                             "raw": "{\n    \"description\": \"New Farmer Welcome\",\n    \"discountType\": \"fixed\",\n    \"discountValue\": 500,\n    \"minOrderValue\": 2000,\n    \"userType\": \"farmer\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/coupons"
+                        "url": "{{baseUrl}}/coupons"
                     }
                 },
                 {
                     "name": "List All Coupons",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/coupons"
+                        "url": "{{baseUrl}}/coupons"
                     }
                 },
                 {
@@ -173,7 +173,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"code\": \"SUMMER2025\",\n    \"cartValue\": 6000,\n    \"userType\": \"retailer\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/coupons/validate"
+                        "url": "{{baseUrl}}/coupons/validate"
                     }
                 }
             ]
@@ -216,7 +216,7 @@
                             "raw": "{\n    \"name\": \"Neem Oil\",\n    \"category\": \"Pesticide\",\n    \"rating\": 4.5,\n    \"soldBy\": \"Farmer Solution Co.\",\n    \"manufacturedBy\": \"BioAgri Ltd.\",\n    \"images\": [\n        {\n            \"key\": \"neem-oil-main\",\n            \"location\": \"https://s3.amazon.com/farmer/neem.jpg\",\n            \"filename\": \"neem.jpg\"\n        }\n    ],\n    \"variants\": [\n        {\n            \"size\": \"500ml\",\n            \"unit\": \"ml\",\n            \"description\": \"Pure cold-pressed neem oil for organic farming\",\n            \"customerPrice\": 150,\n            \"customerDiscount\": 10,\n            \"showCustomerDiscount\": true,\n            \"retailerPrice\": 120,\n            \"retailerDiscount\": 5,\n            \"showRetailerDiscount\": true,\n            \"liveFor\": \"both\",\n            \"stockQuantity\": 100\n        }\n    ],\n    \"packagingInfo\": \"Plastic Bottle\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/products",
+                            "raw": "{{baseUrl}}/products",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -231,14 +231,14 @@
                     "name": "List All Products",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/products"
+                        "url": "{{baseUrl}}/products"
                     }
                 },
                 {
                     "name": "Get Product by ID",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/products/:id"
+                        "url": "{{baseUrl}}/products/:id"
                     }
                 },
                 {
@@ -255,28 +255,28 @@
                             "mode": "raw",
                             "raw": "{\n    \"name\": \"Premium Neem Oil\",\n    \"rating\": 4.9,\n    \"packagingInfo\": \"Glass Bottle\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/products/:id"
+                        "url": "{{baseUrl}}/products/:id"
                     }
                 },
                 {
                     "name": "Soft Delete Product",
                     "request": {
                         "method": "PATCH",
-                        "url": "{{baseUrl}}/api/products/:id/soft-delete"
+                        "url": "{{baseUrl}}/products/:id/soft-delete"
                     }
                 },
                 {
                     "name": "List Products (App User)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/products/user/:userId"
+                        "url": "{{baseUrl}}/products/user/:userId"
                     }
                 },
                 {
                     "name": "Get Product by ID (App User)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/products/:id/user/:userId"
+                        "url": "{{baseUrl}}/products/:id/user/:userId"
                     }
                 }
             ]
@@ -298,7 +298,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"size\": \"1L\",\n    \"unit\": \"L\",\n    \"description\": \"Bulk pack for large farms\",\n    \"customerPrice\": 450,\n    \"customerDiscount\": 15,\n    \"showCustomerDiscount\": true,\n    \"retailerPrice\": 380,\n    \"liveFor\": \"both\",\n    \"stockQuantity\": 50\n}"
                         },
-                        "url": "{{baseUrl}}/api/products/:productId/variants"
+                        "url": "{{baseUrl}}/products/:productId/variants"
                     }
                 },
                 {
@@ -315,14 +315,14 @@
                             "mode": "raw",
                             "raw": "{\n    \"stockQuantity\": 60,\n    \"customerPrice\": 460,\n    \"description\": \"Updated description field\",\n    \"isInStock\": true,\n    \"size\": \"550ml\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/products/:productId/variants/:variantId"
+                        "url": "{{baseUrl}}/products/:productId/variants/:variantId"
                     }
                 },
                 {
                     "name": "Delete Variant",
                     "request": {
                         "method": "DELETE",
-                        "url": "{{baseUrl}}/api/products/:productId/variants/:variantId"
+                        "url": "{{baseUrl}}/products/:productId/variants/:variantId"
                     }
                 },
                 {
@@ -339,7 +339,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"isActive\": false\n}"
                         },
-                        "url": "{{baseUrl}}/api/products/:productId/images/:imageKey/toggle"
+                        "url": "{{baseUrl}}/products/:productId/images/:imageKey/toggle"
                     }
                 }
             ]
@@ -361,7 +361,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"name\": \"Admin User\",\n    \"login\": \"admin_user\",\n    \"password\": \"password123\",\n    \"permissions\": {\n        \"userProfilesAccess\": true,\n        \"productAccess\": true,\n        \"financeAccess\": true,\n        \"userManagementAccess\": true,\n        \"analyticsAccess\": true\n    }\n}"
                         },
-                        "url": "{{baseUrl}}/api/users"
+                        "url": "{{baseUrl}}/users"
                     }
                 },
                 {
@@ -395,7 +395,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"login\": \"admin_user\",\n    \"password\": \"password123\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/users/login"
+                        "url": "{{baseUrl}}/users/login"
                     }
                 },
                 {
@@ -409,7 +409,7 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/users"
+                        "url": "{{baseUrl}}/users"
                     }
                 },
                 {
@@ -423,7 +423,7 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/users/:id"
+                        "url": "{{baseUrl}}/users/:id"
                     }
                 },
                 {
@@ -445,7 +445,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"userProfilesAccess\": true,\n    \"productAccess\": false\n}"
                         },
-                        "url": "{{baseUrl}}/api/users/:id/permissions"
+                        "url": "{{baseUrl}}/users/:id/permissions"
                     }
                 },
                 {
@@ -467,7 +467,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"password\": \"newPassword456\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/users/:id/reset-password"
+                        "url": "{{baseUrl}}/users/:id/reset-password"
                     }
                 }
             ]
@@ -489,7 +489,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"phoneNumber\": \"+919876543210\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/app-users/request-otp"
+                        "url": "{{baseUrl}}/app-users/request-otp"
                     }
                 },
                 {},
@@ -521,7 +521,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"phoneNumber\": \"+919876543210\",\n    \"otp\": \"123456\",\n    \"username\": \"Jane Doe\",\n    \"isFarmer\": false,\n    \"isRetailer\": true,\n    \"retailerProfile\": {\n        \"shopName\": \"Jane's Agri Store\",\n        \"gstNumber\": \"22AAAAA0000A1Z5\"\n    }\n}"
                         },
-                        "url": "{{baseUrl}}/api/app-users/verify-otp"
+                        "url": "{{baseUrl}}/app-users/verify-otp"
                     }
                 },
                 {
@@ -538,7 +538,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"phoneNumber\": \"+919876543210\"\n}"
                         },
-                        "url": "{{baseUrl}}/api/app-users/resend-otp"
+                        "url": "{{baseUrl}}/app-users/resend-otp"
                     }
                 },
                 {
@@ -552,7 +552,7 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/app-users/profile"
+                        "url": "{{baseUrl}}/app-users/profile"
                     }
                 },
                 {
@@ -587,7 +587,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"productId\": \"{{PRODUCT_ID}}\",\n    \"variantId\": \"{{VARIANT_ID}}\",\n    \"quantity\": 2\n}"
                         },
-                        "url": "{{baseUrl}}/api/app-users/cart"
+                        "url": "{{baseUrl}}/app-users/cart"
                     }
                 },
                 {
@@ -609,7 +609,7 @@
                             "mode": "raw",
                             "raw": "{\n    \"username\": \"John Updated\",\n    \"isFarmer\": false,\n    \"isRetailer\": true,\n    \"isRetailerProfileComplete\": true,\n    \"source\": \"app\",\n    \"address\": {\n        \"street\": \"Main Road\",\n        \"city\": \"Hyderabad\",\n        \"state\": \"Telangana\",\n        \"pincode\": \"500001\"\n    },\n    \"retailerProfile\": {\n        \"shopName\": \"John's Seeds & Fertilisers\",\n        \"gstNumber\": \"36AAAAA0000A1Z5\",\n        \"shopAddress\": \"Market Yard, Gachibowli, Hyderabad, 500032\"\n    }\n}"
                         },
-                        "url": "{{baseUrl}}/api/app-users/profile"
+                        "url": "{{baseUrl}}/app-users/profile"
                     }
                 },
                 {
@@ -623,7 +623,7 @@
                                 "type": "text"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/app-users/cart"
+                        "url": "{{baseUrl}}/app-users/cart"
                     }
                 }
             ]
