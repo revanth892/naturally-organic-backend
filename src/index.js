@@ -44,18 +44,35 @@ app.use("/faqs", faqRoutes);
 app.use("/postcodes", postcodeRoutes);
 
 // Database Connection
-mongoose
-    .connect(MONGODB_URI)
-    .then(() => {
+let isConnected = false;
+
+const connectDB = async () => {
+    if (isConnected) return;
+
+    try {
+        const db = await mongoose.connect(MONGODB_URI);
+        isConnected = db.connections[0].readyState;
         console.log("✅ Connected to MongoDB");
-        if (process.env.NODE_ENV !== "production") {
-            app.listen(PORT, '0.0.0.0', () => {
-                console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-            });
-        }
-    })
-    .catch((err) => {
+    } catch (err) {
         console.error("❌ MongoDB connection error:", err.message);
+        throw err;
+    }
+};
+
+// Middleware to ensure DB is connected
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(500).json({ success: false, error: "Database connection failed" });
+    }
+});
+
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
     });
+}
 
 export default app;

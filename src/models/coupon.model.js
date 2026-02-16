@@ -41,6 +41,6 @@ const couponSchema = new mongoose.Schema(
 );
 
 // Index for fast lookups by code
-couponSchema.index({ code: 1 });
+// Redundant index removed as 'unique: true' handles it
 
 export default mongoose.model("Coupon", couponSchema);
