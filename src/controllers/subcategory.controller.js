@@ -15,9 +15,6 @@ export const createSubcategory = async (req, res) => {
 // GET ALL SUBCATEGORIES (optionally filter by category)
 export const getAllSubcategories = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
         const { categoryId, search } = req.query;
 
         const filter = { isDeleted: false };
@@ -28,12 +25,9 @@ export const getAllSubcategories = async (req, res) => {
             filter.name = { $regex: search, $options: "i" };
         }
 
-        const total = await Subcategory.countDocuments(filter);
         const subcategories = await Subcategory.find(filter)
             .populate("category")
-            .sort({ sortOrder: 1, name: 1 })
-            .skip(skip)
-            .limit(limit);
+            .sort({ sortOrder: 1, name: 1 });
 
         const signedSubcategories = await Promise.all(
             subcategories.map((s) => signSubcategoryImages(s))
@@ -42,12 +36,7 @@ export const getAllSubcategories = async (req, res) => {
         res.json({
             success: true,
             data: signedSubcategories,
-            pagination: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit)
-            }
+            count: signedSubcategories.length
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

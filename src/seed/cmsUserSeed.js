@@ -14,9 +14,9 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 const usersToCreate = [
     {
-        name: "Super Admin",
-        login: "superadmin",
-        password: "SuperSecretPassword123!",
+        name: "Operations Manager",
+        login: "ops_mgr",
+        password: "OpsMgrPass2026!",
         userProfilesAccess: true,
         productAccess: true,
         financeAccess: true,
@@ -29,57 +29,6 @@ const usersToCreate = [
         brandAccess: true,
         faqAccess: true,
         postcodeAccess: true
-    },
-    {
-        name: "Operations Manager",
-        login: "ops_mgr",
-        password: "OpsMgrPass2026!",
-        userProfilesAccess: true,
-        productAccess: true,
-        financeAccess: false,
-        userManagementAccess: false,
-        analyticsAccess: false,
-        orderManagementAccess: true,
-        leadManagementAccess: true,
-        couponAccess: true,
-        storeAccess: true,
-        brandAccess: true,
-        faqAccess: true,
-        postcodeAccess: true
-    },
-    {
-        name: "Sales Lead",
-        login: "sales_lead",
-        password: "SalesLead@2026",
-        userProfilesAccess: true,
-        productAccess: false,
-        financeAccess: false,
-        userManagementAccess: false,
-        analyticsAccess: true,
-        orderManagementAccess: false,
-        leadManagementAccess: true,
-        couponAccess: false,
-        storeAccess: false,
-        brandAccess: false,
-        faqAccess: false,
-        postcodeAccess: false
-    },
-    {
-        name: "Support Executive",
-        login: "support_exec",
-        password: "Support#2026",
-        userProfilesAccess: true,
-        productAccess: false,
-        financeAccess: false,
-        userManagementAccess: false,
-        analyticsAccess: false,
-        orderManagementAccess: true,
-        leadManagementAccess: false,
-        couponAccess: false,
-        storeAccess: false,
-        brandAccess: false,
-        faqAccess: false,
-        postcodeAccess: false
     }
 ];
 

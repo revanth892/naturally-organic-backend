@@ -14,9 +14,6 @@ export const createCategory = async (req, res) => {
 // GET ALL CATEGORIES
 export const getAllCategories = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
         const search = req.query.search || "";
 
         const matchStage = { isDeleted: { $ne: true } };
@@ -48,18 +45,10 @@ export const getAllCategories = async (req, res) => {
                 },
             },
             { $project: { products: 0 } },
-            { $sort: { name: 1 } },
-            {
-                $facet: {
-                    metadata: [{ $count: "total" }],
-                    data: [{ $skip: skip }, { $limit: limit }]
-                }
-            }
+            { $sort: { name: 1 } }
         ];
 
-        const result = await Category.aggregate(aggregationPipeline);
-        const categories = result[0].data;
-        const total = result[0].metadata[0]?.total || 0;
+        const categories = await Category.aggregate(aggregationPipeline);
 
         const signedCategories = await Promise.all(
             categories.map((c) => signCategoryImages(c))
@@ -68,12 +57,7 @@ export const getAllCategories = async (req, res) => {
         res.json({
             success: true,
             data: signedCategories,
-            pagination: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit)
-            }
+            count: signedCategories.length
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

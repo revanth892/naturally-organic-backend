@@ -19,9 +19,6 @@ export const createProduct = async (req, res) => {
 // LIST ALL PRODUCTS
 export const getAllProducts = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
         const search = req.query.search || "";
 
         const query = { isDeleted: false };
@@ -29,28 +26,20 @@ export const getAllProducts = async (req, res) => {
             query.name = { $regex: search, $options: "i" };
         }
 
-        const total = await Product.countDocuments(query);
         const products = await Product.find(query)
             .populate("category")
             .populate("subcategory")
             .populate("childCategory")
             .populate("brand")
             .populate("updatedBy", "name email")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+            .sort({ createdAt: -1 });
 
         const signedProducts = await Promise.all(products.map(p => signProductImages(p)));
 
         res.json({
             success: true,
             data: signedProducts,
-            pagination: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit)
-            }
+            count: signedProducts.length
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

@@ -24,7 +24,7 @@ const users = [
             state: "Andhra Pradesh",
             landmark: "Near Rythu Bazar"
         },
-        profileImages: [{ key: "p1", link: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200", filename: "profile.jpg" }],
+        profileImages: [],
         cart: []
     },
     {
@@ -44,7 +44,7 @@ const users = [
             state: "Andhra Pradesh",
             landmark: "Opp State Bank"
         },
-        profileImages: [{ key: "p2", link: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200", filename: "venky.jpg" }],
+        profileImages: [],
         cart: []
     }
 ];
