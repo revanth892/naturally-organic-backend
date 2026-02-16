@@ -30,12 +30,8 @@ app.use(express.json());
 // Database Connection
 mongoose
     .connect(MONGODB_URI)
-    .then(() => {
-        console.log("✅ Connected to MongoDB");
-    })
-    .catch((err) => {
-        console.error("❌ MongoDB connection error:", err.message);
-    });
+    .then(() => console.log("✅ Connected to MongoDB"))
+    .catch((err) => console.error("❌ MongoDB connection error:", err.message));
 
 // Routes
 app.use("/products", productRoutes);
