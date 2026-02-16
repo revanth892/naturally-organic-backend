@@ -27,6 +27,16 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/natura
 app.use(cors());
 app.use(express.json());
 
+// Database Connection
+mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+        console.log("✅ Connected to MongoDB");
+    })
+    .catch((err) => {
+        console.error("❌ MongoDB connection error:", err.message);
+    });
+
 // Routes
 app.use("/products", productRoutes);
 app.use("/users", userRoutes);
@@ -42,32 +52,6 @@ app.use("/brands", brandRoutes);
 app.use("/stores", storeRoutes);
 app.use("/faqs", faqRoutes);
 app.use("/postcodes", postcodeRoutes);
-
-// Database Connection
-let isConnected = false;
-
-const connectDB = async () => {
-    if (isConnected) return;
-
-    try {
-        const db = await mongoose.connect(MONGODB_URI);
-        isConnected = db.connections[0].readyState;
-        console.log("✅ Connected to MongoDB");
-    } catch (err) {
-        console.error("❌ MongoDB connection error:", err.message);
-        throw err;
-    }
-};
-
-// Middleware to ensure DB is connected
-app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (err) {
-        res.status(500).json({ success: false, error: "Database connection failed" });
-    }
-});
 
 if (process.env.NODE_ENV !== "production") {
     app.listen(PORT, '0.0.0.0', () => {

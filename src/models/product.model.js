@@ -12,7 +12,6 @@ const variantSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     size: { type: String, default: null },
     noInBox: { type: Number, default: null },
-    noInBox: { type: Number, default: null },
 });
 
 const imageSchema = new mongoose.Schema(
