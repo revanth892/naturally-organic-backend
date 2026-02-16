@@ -28,10 +28,29 @@ app.use(cors());
 app.use(express.json());
 
 // Database Connection
-mongoose
-    .connect(MONGODB_URI)
-    .then(() => console.log("✅ Connected to MongoDB"))
-    .catch((err) => console.error("❌ MongoDB connection error:", err.message));
+const connectDB = async () => {
+    try {
+        if (mongoose.connection.readyState >= 1) return;
+
+        const connectionOptions = {
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            maxPoolSize: 10,
+            minPoolSize: 1,
+            bufferCommands: false,
+        };
+
+        await mongoose.connect(MONGODB_URI, connectionOptions);
+        console.log("✅ Connected to MongoDB");
+    } catch (err) {
+        console.error("❌ MongoDB connection error:", err.message);
+        // In production/serverless, hitting an error here should ideally be handled
+        // but for now we follow the simple await pattern.
+    }
+};
+
+// Start the connection attempt
+await connectDB();
 
 // Routes
 app.use("/products", productRoutes);
